@@ -47,8 +47,13 @@
 </main><script>
 document.querySelectorAll('.copy').forEach(button=>button.addEventListener('click',async()=>{
  const target=document.getElementById(button.dataset.target);const value=target.innerText;
- try{await navigator.clipboard.writeText(value)}catch(e){const area=document.createElement('textarea');area.value=value;document.body.appendChild(area);area.select();document.execCommand('copy');area.remove()}
- const original=button.textContent;button.textContent='Скопировано';button.classList.add('done');setTimeout(()=>{button.textContent=original;button.classList.remove('done')},2200)
+ let copied=false;
+ try{await navigator.clipboard.writeText(value);copied=true}catch(e){
+  const area=document.createElement('textarea');area.value=value;document.body.appendChild(area);area.select();
+  copied=document.execCommand('copy');area.remove();
+ }
+ const original=button.textContent;button.textContent=copied?'Скопировано':'Выделите текст и скопируйте';button.classList.add('done');
+ setTimeout(()=>{button.textContent=original;button.classList.remove('done')},3000)
 }));
 const checks=[...document.querySelectorAll('.check input')];checks.forEach(c=>c.addEventListener('change',()=>{document.getElementById('progress').textContent=`Готово: ${checks.filter(x=>x.checked).length} из 4`}));
 </script></body></html>
