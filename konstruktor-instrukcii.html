@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Конструктор инструкции для ИИ — 5 пунктов</title>
+<style>
+:root{--blue:#1C347E;--blue2:#2a4a9e;--green:#72B626;--dgreen:#4A8A10;--ink:#1b2440;--muted:#5F6678;--line:#d6ddf0;--tint:#EEF1F8;--warn:#b26a00;--bad:#c0392b}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Arial,Helvetica,sans-serif;color:var(--ink);background:#f7f9fd;font-size:15px;line-height:1.45}
+header{background:var(--blue);color:#fff;padding:22px 28px 20px}
+header .k{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#cfd8f5;font-weight:700}
+header h1{margin:6px 0 6px;font-size:26px;line-height:1.2}
+header p{margin:0;color:#e4e9f8;max-width:900px}
+main{display:grid;grid-template-columns:minmax(320px,560px) 1fr;gap:22px;padding:22px 28px;max-width:1400px;margin:0 auto}
+@media(max-width:960px){main{grid-template-columns:1fr;padding:16px}}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+.card h2{font-size:16px;color:var(--blue);margin:0 0 10px;display:flex;gap:10px;align-items:center}
+.num{display:inline-flex;width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;font-weight:700;align-items:center;justify-content:center;flex:none}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.presets button{border:1px solid var(--line);background:var(--tint);color:var(--blue);border-radius:999px;padding:7px 13px;font:inherit;font-size:14px;cursor:pointer}
+.presets button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+label.f{display:block;font-weight:600;font-size:13.5px;margin:10px 0 4px;color:var(--muted)}
+select,input[type=text],textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid #b9c4e4;border-radius:8px;background:#fff;color:var(--ink)}
+textarea{min-height:58px;resize:vertical}
+select:focus,input:focus,textarea:focus{outline:2px solid var(--blue);outline-offset:1px}
+.own{margin-top:6px;display:none}
+.row3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+.checks label{display:flex;gap:10px;align-items:flex-start;padding:7px 8px;border-radius:8px;cursor:pointer}
+.checks label:hover{background:var(--tint)}
+.checks input{margin-top:3px;width:18px;height:18px;accent-color:var(--blue);flex:none}
+.add{display:flex;gap:8px;margin-top:8px}
+.add button{flex:none}
+button.b{border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer}
+.b.pri{background:var(--green);color:#fff}
+.b.sec{background:var(--tint);color:var(--blue);border:1px solid var(--line)}
+.out{position:sticky;top:16px;align-self:start}
+pre{white-space:pre-wrap;word-wrap:break-word;background:#fff;border:2px solid var(--blue);border-radius:12px;padding:16px;font-family:Consolas,"Courier New",monospace;font-size:14px;min-height:260px;margin:0}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.st{display:grid;gap:6px;margin-top:6px}
+.st div{display:flex;gap:8px;align-items:flex-start;font-size:14px}
+.ok::before{content:"✓";color:var(--dgreen);font-weight:700}
+.wr::before{content:"!";color:var(--warn);font-weight:700}
+.er::before{content:"✕";color:var(--bad);font-weight:700}
+.note{background:var(--tint);border-left:4px solid var(--blue);border-radius:8px;padding:10px 12px;font-size:14px;margin-top:12px}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:10px 0 26px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;padding:10px 18px;border-radius:10px;display:none}
+</style></head><body>
+<header><div class="k">ИИ-отдел бухгалтера · урок 0.2 · подарок</div>
+<h1>Конструктор инструкции для ИИ: 5 пунктов</h1>
+<p>Выберите помощника — поля заполнятся заготовкой. Поменяйте формулировки, отметьте галочками правила и проверку. Готовая инструкция собирается в блоке «Готовая инструкция»: копируете и вставляете в новый чат Алисы AI или ГигаЧата.</p></header>
+<main>
+<section>
+ <div class="card"><h2><span class="num">0</span>Какой помощник нужен</h2>
+  <div class="presets" id="presets"></div>
+  <div class="row3" style="margin-top:12px">
+   <div><label class="f">Название помощника</label><input type="text" id="name"></div>
+   <div><label class="f">Версия</label><input type="text" id="ver" value="1.0"></div>
+   <div><label class="f">Месяц и год</label><input type="text" id="date"></div>
+  </div></div>
+ <div class="card"><h2><span class="num">1</span>РОЛЬ</h2>
+  <label class="f">Кто отвечает</label><select id="role"></select><textarea class="own" id="role_o" placeholder="Свой вариант: Ты — …"></textarea>
+  <label class="f">Для кого результат</label><select id="aud"></select><textarea class="own" id="aud_o" placeholder="Свой вариант"></textarea></div>
+ <div class="card"><h2><span class="num">2</span>ЗАДАЧА И РЕЗУЛЬТАТ</h2>
+  <label class="f">Что сделать</label><select id="task"></select><textarea class="own" id="task_o" placeholder="Свой вариант"></textarea>
+  <label class="f">В каком виде отдать</label><select id="fmt"></select><textarea class="own" id="fmt_o" placeholder="Результат — …"></textarea></div>
+ <div class="card"><h2><span class="num">3</span>ИСХОДНЫЕ ДАННЫЕ</h2>
+  <label class="f">Что и как подаёте</label><select id="data"></select><textarea class="own" id="data_o" placeholder="Свой вариант"></textarea>
+  <label class="f">Обозначения в данных</label><select id="note"></select><textarea class="own" id="note_o" placeholder="Свой вариант"></textarea></div>
+ <div class="card"><h2><span class="num">4</span>ПРАВИЛА <small style="color:var(--muted);font-weight:400">— не меньше трёх конкретных запретов</small></h2>
+  <div class="checks" id="rules"></div>
+  <div class="add"><input type="text" id="rule_new" placeholder="Своё правило: Не …"><button class="b sec" id="rule_add">Добавить</button></div></div>
+ <div class="card"><h2><span class="num">5</span>ПРОВЕРКА</h2>
+  <div class="checks" id="checks"></div>
+  <div class="add"><input type="text" id="check_new" placeholder="Своя проверка"><button class="b sec" id="check_add">Добавить</button></div></div>
+</section>
+<section class="out">
+ <div class="card"><h2>Готовая инструкция</h2>
+  <pre id="out"></pre>
+  <div class="bar"><button class="b pri" id="copy">Копировать</button><button class="b sec" id="dl">Скачать .txt</button><button class="b sec" id="reset">Сбросить</button></div>
+  <div class="st" id="st"></div>
+  <div class="note"><b>Как отправить.</b> Новый чат → вставьте инструкцию → пустая строка → ваши данные (или приложите один TXT-файл). Всё — одним сообщением. Без ФИО, ИНН, телефонов и названий: только коды К-01 и метки {{ФИО}}.</div>
+  <div class="note"><b>Где хранить.</b> В своём файле «Мои инструкции» с версией и датой. Уточнили правило — поднимите версию: 1.0 → 1.1.</div>
+ </div>
+</section>
+</main>
+<footer>ИИ готовит — бухгалтер решает · Елена Шедис · Бухгалтерское агентство · buhkld.ru</footer>
+<div class="toast" id="toast">Скопировано</div>
+<script>
+const V={"role": ["Ты — помощник бухгалтера по переписке с клиентами.", "Ты — налоговый консультант бухгалтерской фирмы.", "Ты — диспетчер бухгалтерской фирмы: показываешь, что срочно и где клиенты ждут ответа.", "Ты — помощник бухгалтера по первичным документам: разбираешь выписки и документы.", "Ты — контролёр: сравниваешь две таблицы и показываешь расхождения.", "Ты — помощник по кадровым документам: заполняешь шаблоны моими данными.", "Ты — секретарь консультаций: из расшифровки встречи делаешь решения, задачи и письмо клиенту.", "Ты — аналитик бухгалтерской фирмы: считаешь по моей таблице и показываешь расчёт.", "Ты — методист: проверяешь мои инструкции для ИИ-помощников."], "aud": ["Результат читаю я, бухгалтер. Решения принимаю я.", "Отвечаешь клиенту-предпринимателю, он не бухгалтер.", "Клиенты — предприниматели, не бухгалтеры.", "Результат читает руководитель фирмы: сначала вывод, потом детали.", "Результат читает сотрудник клиента, не бухгалтер: простые слова, без сокращений.", "Результат читает главный бухгалтер клиента: профессиональные термины допустимы."], "task": ["Перепиши мой черновик сообщения клиенту: вежливо, коротко, понятно человеку без бухгалтерского образования.", "Ответь на вопрос клиента.", "Разбери переписку и задачи из файла и покажи, что срочно и где клиенты ждут ответа.", "Разбери операции из выписки по группам.", "Сравни две таблицы и найди расхождения.", "Заполни шаблон документа моими данными.", "Составь из расшифровки встречи список решений и задач.", "Составь список вопросов, которые нужно задать клиенту.", "Сократи текст и оставь главное.", "Проверь мою инструкцию для помощника: найди пропуски и неясные места."], "fmt": ["Результат — готовый текст не длиннее 5 предложений, на «вы».", "Результат — ответ до 6 предложений простым языком, затем блок «Нормы» и блок «Что проверить бухгалтеру».", "Результат — таблица: Клиент | Что нужно | Срок | Цитата | Действие.", "Результат — таблица: Дата | Сумма | Контрагент | Группа | Вопрос ко мне.", "Результат — таблица расхождений: Строка | Таблица 1 | Таблица 2 | Разница | Возможная причина.", "Результат — нумерованный список, не больше 7 пунктов.", "Результат — сначала вывод одной фразой, затем расчёт по шагам.", "Результат — заполненный шаблон без изменений в его тексте и список того, что заполнить не удалось.", "Результат — три блока: «Решения», «Задачи: кто, что, срок», «Письмо клиенту»."], "data": ["Мой черновик — в этом же сообщении после слов «ЧЕРНОВИК:».", "Мой текст — в этом же сообщении после слова «ДАННЫЕ:».", "Режим налогообложения, наличие работников, год и вопрос — в этом же сообщении после слова «ДАННЫЕ:».", "Один TXT-файл, приложен к этому сообщению.", "Один TXT-файл из двух частей: часть 1 и часть 2 разделены строкой «=== ЧАСТЬ 2 ===».", "Шаблон документа и данные для него — в приложенном TXT-файле."], "note": ["Клиенты обозначены кодами (К-01, К-02), люди — метками вида {{ФИО}}.", "Имён и названий в данных нет. Если встретишь — не повторяй их в ответе.", "Сегодняшнюю дату и нерабочие дни я пишу в сообщении.", "Последняя строка файла — «=== КОНЕЦ ФАЙЛА ===».", "Суммы — в рублях, даты — в формате ДД.ММ.ГГГГ."], "rules": ["Не добавляй фактов, дат, сумм, сроков, последствий и обещаний, которых нет в моих данных.", "Даты, суммы и номера переноси точно, символ в символ.", "Коды (К-01) и метки {{…}} оставляй как есть.", "Не называй цены и ставки наших услуг.", "Ссылайся только на НК РФ и письма ФНС и Минфина с номером и датой. Не уверен в реквизитах письма — не указывай его.", "Не хватает данных — задай мне вопрос, не додумывай.", "Сроки не придумывай и не рассчитывай. Нет срока в данных — пиши «срок не указан».", "Каждую итоговую сумму покажи расчётом: что с чем сложено.", "На вопросы клиентов по существу не отвечай — помечай «бухгалтеру».", "Цитаты приводи дословно из данных. Чего нет в данных, не пиши.", "Без канцелярита и восклицательных знаков.", "Бухгалтерские сокращения расшифруй один раз простыми словами, не меняя смысла.", "Текст шаблона не меняй: заполняй только метки.", "Если прочитал файл не полностью — напиши это первой строкой ответа."], "checks": ["После текста дай два списка: «Сохранил» — все даты, суммы, сроки и коды из данных; «Убрал или изменил» — что и почему.", "В блоке «Нормы» по каждой ссылке укажи уверенность: высокая или нужна проверка.", "В конце напиши, сколько строк было в данных и сколько попало в результат; что не попало и почему.", "Процитируй последнюю строку файла.", "Отдельно дай список «Вопросы ко мне», если они есть.", "В конце дай итог по каждой группе и общий итог, чтобы я сверил с исходными данными.", "Перечисли все допущения, которые ты сделал."]};
+const P=[["Стажёр по письмам", 0, 2, 0, 0, 0, 0, [0, 1, 3, 5, 10], [0, 4]], ["Налоговый референт", 1, 1, 1, 1, 2, 1, [4, 5, 3, 1], [1, 4]], ["Диспетчер", 2, 0, 2, 2, 3, 3, [6, 8, 9, 2, 13], [2, 3]], ["Первичник", 3, 0, 3, 3, 3, 3, [1, 2, 5, 13, 0], [5, 3]], ["Контролёр", 4, 0, 4, 4, 4, 4, [1, 7, 5, 0], [5, 6]], ["Кадровик", 5, 0, 5, 7, 5, 0, [12, 2, 5, 0], [4, 6]], ["Секретарь консультаций", 6, 0, 6, 8, 1, 0, [6, 9, 8, 0], [4, 6]], ["Аналитик", 7, 3, -1, 6, 3, 4, [7, 1, 5, 0], [5, 6]], ["Методист", 8, 0, 9, 5, 1, 1, [0, 5, 9], [6]]];
+const $=id=>document.getElementById(id);
+const OWN='— свой вариант —';
+const sel=['role','aud','task','fmt','data','note'];
+function fillSelect(id){const s=$(id);s.innerHTML='';const o0=document.createElement('option');o0.value='';o0.textContent='— не выбрано —';s.appendChild(o0);V[id].forEach((t,i)=>{const o=document.createElement('option');o.value=i;o.textContent=t;s.appendChild(o)});const o=document.createElement('option');o.value='own';o.textContent=OWN;s.appendChild(o);s.onchange=()=>{$(id+'_o').style.display=s.value==='own'?'block':'none';render()};$(id+'_o').oninput=render}
+let rules=V.rules.map(t=>({t,on:false})),checks=V.checks.map(t=>({t,on:false}));
+function drawList(id,arr){const box=$(id);box.innerHTML='';arr.forEach((x,i)=>{const l=document.createElement('label');const c=document.createElement('input');c.type='checkbox';c.checked=x.on;c.onchange=()=>{x.on=c.checked;render()};const s=document.createElement('span');s.textContent=x.t;l.append(c,s);box.appendChild(l)})}
+function val(id){const s=$(id);if(s.value==='own')return $(id+'_o').value.trim();if(s.value==='')return '';return V[id][+s.value]}
+function monthYear(){const d=new Date();return String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear()}
+function build(){
+ const L=[];L.push('Версия '+($('ver').value.trim()||'1.0')+' · '+($('date').value.trim()||monthYear())+' · '+($('name').value.trim()||'Мой помощник'));
+ const j=(a,b)=>[a,b].filter(Boolean).join(' ');
+ L.push('РОЛЬ. '+j(val('role'),val('aud')));
+ L.push('ЗАДАЧА И РЕЗУЛЬТАТ. '+j(val('task'),val('fmt')));
+ L.push('ИСХОДНЫЕ ДАННЫЕ. '+j(val('data'),val('note')));
+ const r=rules.filter(x=>x.on).map((x,i)=>(i+1)+'. '+x.t);
+ L.push('ПРАВИЛА.'+(r.length?' '+r.join(' '):''));
+ L.push('ПРОВЕРКА. '+checks.filter(x=>x.on).map(x=>x.t).join(' '));
+ return L.join('\n');
+}
+function render(){
+ const t=build();$('out').textContent=t;
+ const st=[];const n=t.length;
+ const filled=[j2(val('role')),j2(val('task')),j2(val('data')),rules.some(x=>x.on),checks.some(x=>x.on)];
+ function j2(x){return !!x}
+ const names=['Роль','Задача','Исходные данные','Правила','Проверка'].filter((_,i)=>!filled[i]);
+ st.push(names.length?['er','Не заполнено: '+names.join(', ')]:['ok','Все 5 пунктов заполнены']);
+ const rc=rules.filter(x=>x.on).length;
+ st.push(rc>=3?['ok','Правил: '+rc]:['wr','Правил: '+rc+' — добавьте хотя бы 3 конкретных запрета']);
+ st.push(n>3000?['wr','Длина: '+n+' знаков — для ГигаЧата длинно: запрос вместе с данными до 4 000 знаков']:['ok','Длина: '+n+' знаков']);
+ if(/\b\d{10,12}\b|\+7\s?\(?\d|@[\w-]+\.|ИНН|паспорт/i.test(t)) st.push(['er','Похоже на персональные данные (ИНН, телефон, почта, паспорт). Уберите их из инструкции']);
+ $('st').innerHTML='';st.forEach(([c,m])=>{const d=document.createElement('div');d.className=c;d.textContent=' '+m;$('st').appendChild(d)});
+}
+function applyPreset(i){const p=P[i];document.querySelectorAll('#presets button').forEach((b,k)=>b.classList.toggle('on',k===i));
+ $('name').value=p[0];const ids=['role','aud','task','fmt','data','note'];
+ ids.forEach((id,k)=>{const v=p[k+1];if(v===-1){$(id).value='own';$(id+'_o').style.display='block';$(id+'_o').value='Посчитай показатели по моей таблице и покажи, из чего сложилась каждая цифра.'}else{$(id).value=String(v);$(id+'_o').style.display='none'}});
+ rules.forEach((x,k)=>x.on=p[7].includes(k));checks.forEach((x,k)=>x.on=p[8].includes(k));drawList('rules',rules);drawList('checks',checks);render()}
+function init(){
+ sel.forEach(fillSelect);$('date').value=monthYear();
+ P.forEach((p,i)=>{const b=document.createElement('button');b.textContent=p[0];b.onclick=()=>applyPreset(i);$('presets').appendChild(b)});
+ const b=document.createElement('button');b.textContent='Свой помощник';b.onclick=()=>{document.querySelectorAll('#presets button').forEach(x=>x.classList.remove('on'));b.classList.add('on');$('name').value='';sel.forEach(id=>{$(id).value='';$(id+'_o').style.display='none'});rules.forEach(x=>x.on=false);checks.forEach(x=>x.on=false);drawList('rules',rules);drawList('checks',checks);render()};$('presets').appendChild(b);
+ ['name','ver','date'].forEach(id=>$(id).oninput=render);
+ $('rule_add').onclick=()=>{const v=$('rule_new').value.trim();if(v){rules.push({t:v,on:true});$('rule_new').value='';drawList('rules',rules);render()}};
+ $('check_add').onclick=()=>{const v=$('check_new').value.trim();if(v){checks.push({t:v,on:true});$('check_new').value='';drawList('checks',checks);render()}};
+ $('copy').onclick=async()=>{const t=build();try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}const x=$('toast');x.style.display='block';setTimeout(()=>x.style.display='none',1500)};
+ $('dl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([build()],{type:'text/plain;charset=utf-8'}));a.download=($('name').value.trim()||'Инструкция')+'_v'+($('ver').value.trim()||'1.0')+'.txt';a.click()};
+ $('reset').onclick=()=>applyPreset(0);
+ applyPreset(0);
+}
+init();
+</script></body></html>

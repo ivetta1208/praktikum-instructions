@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Обезличиватель текста для ИИ — урок 0.3</title>
+<style>
+:root{--blue:#1C347E;--green:#72B626;--dgreen:#4A8A10;--ink:#1b2440;--muted:#5F6678;--line:#d6ddf0;--tint:#EEF1F8;--warn:#9a5b00;--bad:#c0392b;--hl:#fff1a8;--hlc:#d9f0c2}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Arial,Helvetica,sans-serif;color:var(--ink);background:#f7f9fd;font-size:15px;line-height:1.45}
+header{background:var(--blue);color:#fff;padding:22px 28px 20px}
+header .k{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#cfd8f5;font-weight:700}
+header h1{margin:6px 0 6px;font-size:26px;line-height:1.2}
+header p{margin:0;color:#e4e9f8;max-width:980px}
+.safe{display:inline-block;margin-top:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 10px;font-size:13px}
+main{max-width:1400px;margin:0 auto;padding:22px 28px;display:grid;grid-template-columns:minmax(340px,520px) 1fr;gap:22px}
+@media(max-width:980px){main{grid-template-columns:1fr;padding:16px}}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+.card h2{font-size:16px;color:var(--blue);margin:0 0 6px;display:flex;gap:10px;align-items:center}
+.num{display:inline-flex;width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;font-weight:700;align-items:center;justify-content:center;flex:none}
+.hint{color:var(--muted);font-size:13px;margin:0 0 10px}
+table{width:100%;border-collapse:collapse}
+th{font-size:12px;text-align:left;color:var(--muted);font-weight:600;padding:4px 4px}
+td{padding:3px 4px;vertical-align:top}
+td input{width:100%;border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:14px}
+td.code input{width:74px;font-weight:700;color:var(--blue)}
+td.del button{border:none;background:none;color:#a0a7ba;font-size:18px;cursor:pointer;padding:4px}
+td.del button:hover{color:var(--bad)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+button.b{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 12px;font:inherit;font-size:14px;cursor:pointer;color:var(--ink)}
+button.b:hover{border-color:var(--blue)}
+button.p{background:var(--green);border-color:var(--green);color:#fff;font-weight:700}
+button.p:hover{background:var(--dgreen);border-color:var(--dgreen)}
+button.d{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;resize:vertical}
+.out{white-space:pre-wrap;word-wrap:break-word;border:1px solid var(--line);border-radius:10px;padding:12px;min-height:120px;background:#fbfcff;font-size:14px}
+.out mark{background:var(--hlc);border-radius:4px;padding:0 2px}
+.out mark.w{background:var(--hl)}
+.out mark.r{background:#f8c9c3}
+.list{margin:8px 0 0;padding:0;list-style:none;font-size:14px}
+.list li{padding:5px 8px;border-radius:8px;margin-bottom:4px}
+.ok{background:#eef8e4;color:#2f5d0a}
+.wr{background:#fff6dd;color:var(--warn)}
+.bd{background:#fdecea;color:var(--bad)}
+.stat{font-size:13px;color:var(--muted);margin-top:6px}
+label.ck{font-size:13px;color:var(--muted);display:inline-flex;gap:6px;align-items:center;margin-top:8px}
+details{margin-top:10px}
+summary{cursor:pointer;color:var(--blue);font-size:14px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 26px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;opacity:0;transition:.3s;pointer-events:none}
+.toast.on{opacity:1}
+</style></head>
+<body>
+<header>
+  <div class="k">ИИ-отдел бухгалтера · урок 0.3 · подарок</div>
+  <h1>Обезличиватель текста для ИИ</h1>
+  <p>Вставьте текст — страница заменит клиентов кодами из вашей таблицы, уберёт телефоны, e-mail, ИНН, СНИЛС, паспорта, карты и счета и подсветит то, что нужно проверить глазами. Ответ ИИ раскодируете здесь же.</p>
+  <div class="safe">Работает без интернета. Текст и таблица никуда не отправляются и не сохраняются — закрыли страницу, всё стёрлось.</div>
+</header>
+<main>
+<section>
+  <div class="card">
+    <h2><span class="num">1</span>Таблица кодов</h2>
+    <p class="hint">Код — как назвать в тексте для ИИ. «Как пишется в тексте» — все варианты через точку с запятой: «ООО Ромашка; Ромашка». Падежи страница ищет сама.</p>
+    <table><thead><tr><th>Код</th><th>Как пишется в тексте</th><th></th></tr></thead><tbody id="tb"></tbody></table>
+    <div class="row">
+      <button class="b" onclick="addRow('К')">+ Клиент К</button>
+      <button class="b" onclick="addRow('Ф')">+ Физлицо Ф</button>
+      <button class="b" onclick="addRow('С')">+ Сотрудник С</button>
+      <button class="b" onclick="addRow('П')">+ Контрагент П</button>
+    </div>
+    <label class="ck"><input type="checkbox" id="cases" checked> Искать в любом падеже (Иванова, Ивановой, Иванову)</label>
+    <details><summary>Загрузить или сохранить таблицу</summary>
+      <p class="hint" style="margin-top:8px">Откройте свою таблицу кодов (Excel-шаблон урока), выделите столбцы «Код» и «Кто это» без заголовка, нажмите Ctrl+C и вставьте сюда:</p>
+      <textarea id="paste" style="min-height:80px" placeholder="К-01	ООО Ромашка; Ромашка&#10;С-01	Иванова Мария Петровна; Иванова"></textarea>
+      <div class="row">
+        <button class="b" onclick="importPaste()">Добавить из вставки</button>
+        <button class="b" onclick="saveCSV()">Сохранить таблицу файлом (CSV для Excel)</button>
+        <button class="b" onclick="document.getElementById('csv').click()">Открыть файл таблицы</button>
+        <input type="file" id="csv" accept=".csv,.txt" style="display:none" onchange="openCSV(this)">
+      </div>
+      <p class="hint" style="margin-top:8px">Файл таблицы храните в папке под паролем, отдельно от рабочих. В ИИ таблицу не загружайте никогда.</p>
+    </details>
+  </div>
+  <div class="card">
+    <h2><span class="num">!</span>Что убирается автоматически</h2>
+    <ul class="list">
+      <li class="ok">Телефоны, e-mail → {{ТЕЛЕФОН-1}}, {{EMAIL-1}}</li>
+      <li class="ok">ИНН, СНИЛС, паспорт, ОГРН → {{ИНН-1}}, {{СНИЛС-1}}…</li>
+      <li class="ok">Номера карт, расчётных счетов, БИК → {{КАРТА-1}}, {{СЧЁТ-1}}…</li>
+      <li class="ok">Адреса с «ул.», «д.», «кв.» → {{АДРЕС-1}}</li>
+      <li class="wr">Отчества и слова с заглавной буквы, которых нет в таблице, — подсвечиваются жёлтым: проверьте глазами</li>
+      <li class="bd">Пароли, логины, коды из СМС — красная зона: такой текст в ИИ не отправляем вообще</li>
+    </ul>
+  </div>
+</section>
+<section>
+  <div class="card">
+    <h2><span class="num">2</span>Текст для ИИ</h2>
+    <p class="hint">Вставьте письмо, переписку или фрагмент документа.</p>
+    <textarea id="src" placeholder="Например: Мария Петровна, добрый день! По ООО «Ромашка» нужен приказ на Иванову Анну Сергеевну. Телефон +7 911 123-45-67, ИНН 390123456789."></textarea>
+    <div class="row"><button class="b p" onclick="run()">Обезличить</button><button class="b" onclick="clearAll()">Очистить</button></div>
+    <div id="res" style="display:none">
+      <p class="hint" style="margin:12px 0 6px">Результат: <mark style="background:var(--hlc)">зелёным</mark> — заменено, <mark style="background:var(--hl)">жёлтым</mark> — проверьте глазами.</p>
+      <div class="out" id="out"></div>
+      <div class="row"><button class="b d" onclick="copyOut()">Копировать текст для ИИ</button></div>
+      <ul class="list" id="checks"></ul>
+      <div class="stat" id="stat"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2><span class="num">3</span>Раскодировать ответ ИИ</h2>
+    <p class="hint">Вставьте ответ ИИ — коды и метки вернутся к настоящим названиям. Работает, пока страница открыта и таблица заполнена.</p>
+    <textarea id="ans" style="min-height:110px" placeholder="Вставьте ответ ИИ с кодами К-01, {{ТЕЛЕФОН-1}}…"></textarea>
+    <div class="row"><button class="b p" onclick="decode()">Раскодировать</button></div>
+    <div id="dres" style="display:none"><div class="out" id="dout" style="margin-top:10px"></div>
+    <div class="row"><button class="b d" onclick="copyD()">Копировать</button></div><div class="stat" id="dstat"></div></div>
+  </div>
+</section>
+</main>
+<footer>Елена Шедис · Бухгалтерское агентство · buhkld.ru · ИИ готовит — бухгалтер решает</footer>
+<div class="toast" id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);
+let rows=[]; let lastMap={};
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function reEsc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+function render(){
+  const tb=$('tb'); tb.innerHTML='';
+  rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td class="code"><input value="'+esc(r.code).replace(/"/g,'&quot;')+'"></td><td><input placeholder="Как пишется в тексте" value="'+esc(r.names).replace(/"/g,'&quot;')+'"></td><td class="del"><button title="Удалить">×</button></td>';
+    const [a,b]=tr.querySelectorAll('input');
+    a.oninput=()=>rows[i].code=a.value; b.oninput=()=>rows[i].names=b.value;
+    tr.querySelector('button').onclick=()=>{rows.splice(i,1);render()};
+    tb.appendChild(tr);
+  });
+}
+function nextCode(p){let n=0;rows.forEach(r=>{const m=r.code.match(new RegExp('^'+p+'-(\\d+)$'));if(m)n=Math.max(n,+m[1])});return p+'-'+String(n+1).padStart(2,'0')}
+function addRow(p){rows.push({code:nextCode(p),names:''});render();const ins=$('tb').querySelectorAll('tr:last-child input');if(ins[1])ins[1].focus()}
+function parseLines(t){
+  const out=[];
+  t.split(/\r?\n/).forEach(l=>{
+    if(!l.trim())return;
+    let parts=l.split('\t'); if(parts.length<2) parts=l.split(';');
+    if(parts.length<2)return;
+    const code=parts[0].trim().replace(/^"|"$/g,''); const names=(l.includes('\t')?parts[1]:parts.slice(1).join('; ')).replace(/^"|"$/g,'').replace(/""/g,'"').trim();
+    if(/^код$/i.test(code))return;
+    if(code&&names) out.push({code,names});
+  });
+  return out;
+}
+function importPaste(){const a=parseLines($('paste').value);rows=rows.filter(r=>r.code||r.names).concat(a);render();$('paste').value='';toast('Добавлено строк: '+a.length)}
+function saveCSV(){
+  const lines=['Код;Как пишется в тексте'].concat(rows.filter(r=>r.code&&r.names).map(r=>r.code+';"'+r.names.replace(/"/g,'""').replace(/;/g,' | ')+'"'));
+  const blob=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Таблица_кодов.csv';a.click();
+}
+function openCSV(inp){const f=inp.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>{
+  const t=String(fr.result).replace(/^﻿/,'');const out=[];
+  t.split(/\r?\n/).forEach(l=>{const m=l.match(/^([^;]+);"?(.*?)"?$/);if(m&&!/^код$/i.test(m[1].trim())&&m[2].trim())out.push({code:m[1].trim(),names:m[2].replace(/ \| /g,'; ').replace(/""/g,'"')})});
+  rows=rows.filter(r=>r.code||r.names).concat(out);render();toast('Загружено строк: '+out.length);inp.value='';};fr.readAsText(f,'utf-8')}
+const L='[\\p{L}]';
+function variantRe(v,cases){
+  const words=v.trim().split(/\s+/).filter(Boolean);
+  const parts=words.map(w=>{
+    const q=w.replace(/^[«"“]+|[»"”]+$/g,'');
+    const pre=w.match(/^[«"“]+/)?'[«"“]?':''; const post=w.match(/[»"”]+$/)?'[»"”]?':'';
+    if(!cases||q.length<4||!/^\p{L}+$/u.test(q)) return pre+reEsc(q)+post;
+    const cut=q.length>=7?2:1;
+    return pre+reEsc(q.slice(0,q.length-cut))+L+'{0,'+(cut+2)+'}'+post;
+  });
+  return parts.join('[\\s\\u00a0]+');
+}
+const AUTO=[
+ ['EMAIL',/[\w.+-]+@[\w-]+(\.[\w-]+)+/gu],
+ ['СЧЁТ',/(?<!\d)\d{5}[ .]?\d{3}[ .]?\d[ .]?\d{4}[ .]?\d{7}(?!\d)/gu],
+ ['КАРТА',/(?<!\d)\d{4}[ -]?\d{4}[ -]?\d{4}[ -]?\d{4}(?:[ -]?\d{2,3})?(?!\d)/gu],
+ ['СНИЛС',/(?<!\d)\d{3}[- ]?\d{3}[- ]?\d{3}[- ]\d{2}(?!\d)/gu],
+ ['ПАСПОРТ',/(?<!\d)\d{2}[ ]?\d{2}[ №N]{1,3}\d{6}(?!\d)/gu],
+ ['ТЕЛЕФОН',/(?<![\d\w+])(?:\+7|8)[\s\-(]*\d[\d\s\-()]{8,14}\d(?!\d)/gu,m=>m.replace(/\D/g,'').length===11],
+ ['ОГРН',/(?<=ОГРН(?:ИП)?[:\s№]*)\d{13,15}(?!\d)/gu],
+ ['БИК',/(?<=БИК[:\s№]*)\d{9}(?!\d)/gu],
+ ['ИНН',/(?<!\d)(?:\d{12}|\d{10})(?!\d)/gu],
+ ['АДРЕС',/(?:(?:\d{6},?\s*)?(?:г\.\s*\p{Lu}[\p{L}-]+,?\s*)?)(?:ул\.|улица|пр-т|проспект|пер\.|переулок|бульвар|б-р|ш\.|шоссе|пл\.|наб\.)\s*[\p{L}\d .-]{2,40}?(?:,?\s*(?:д\.|дом)\s*\d+[\p{L}\d/-]*)?(?:,?\s*(?:корп\.|к\.|стр\.)\s*\d+)?(?:,?\s*(?:кв\.|квартира|оф\.|офис)\s*\d+)?(?=[,.;\n)]|$)/gu],
+];
+const RED=/(?<![\p{L}])(парол\p{L}*|логин\p{L}*|код\p{L}* из смс|смс-код\p{L}*|код\p{L}* подтверждени\p{L}*|пин-код\p{L}*|cvv|cvc|кодов\p{L}* слов\p{L}*|секретн\p{L}* слов\p{L}*|ключ\p{L}* эп|сертификат\p{L}* эп|токен\p{L}*)(?![\p{L}])/giu;
+function run(){
+  const cases=$('cases').checked; let t=$('src').value; if(!t.trim()){toast('Вставьте текст');return}
+  const store=[]; const tok=i=>''+i+'';
+  const cnt={}; lastMap={};
+  // 1. автоматические шаблоны
+  AUTO.forEach(([name,re,ok])=>{
+    t=t.replace(re,(m)=>{
+      if(ok&&!ok(m))return m;
+      // не трогать уже заменённое
+      const key=name+'|'+m.replace(/\s/g,'');
+      let lab=Object.keys(lastMap).find(k=>lastMap[k].key===key);
+      if(!lab){cnt[name]=(cnt[name]||0)+1;lab='{{'+name+'-'+cnt[name]+'}}';lastMap[lab]={orig:m.trim(),key}}
+      store.push({lab,kind:'auto'}); return tok(store.length-1);
+    });
+  });
+  // 2. таблица кодов: длинные варианты раньше коротких
+  const vars=[];
+  rows.forEach(r=>{if(!r.code.trim())return; r.names.split(';').map(s=>s.trim()).filter(Boolean).forEach((v,j)=>vars.push({code:r.code.trim(),v,first:r.names.split(';')[0].trim()}))});
+  vars.sort((a,b)=>b.v.length-a.v.length);
+  const used={};
+  vars.forEach(x=>{
+    let re; try{re=new RegExp('(?<![\\p{L}\\d])'+variantRe(x.v,cases)+'(?![\\p{L}\\d])','giu')}catch(e){return}
+    t=t.replace(re,m=>{used[x.code]=(used[x.code]||0)+1; lastMap[x.code]={orig:x.first}; store.push({lab:x.code,kind:'code',orig:m}); return tok(store.length-1)});
+  });
+  // 3. подсказки: отчества, заглавные слова, красная зона, остатки признаков
+  let html=esc(t);
+  const warns=[]; const redHits=[];
+  html=html.replace(RED,m=>{redHits.push(m);return ''+m+''});
+  const patr=/(?<![\p{L}])(?:\p{Lu}\p{Ll}+[\s ]+)?\p{Lu}\p{Ll}+(?:ович|евич|ьич|овна|евна|ична|инична)(?![\p{L}])/gu;
+  const pw=new Set(); html=html.replace(patr,m=>{m.split(/[\s\u00a0]+/).forEach(w=>pw.add(w));warns.push('Похоже на имя с отчеством: «'+m+'»');return ''+m+''});
+  const caps=/(?<=[\p{Ll}\d,;:)]\s|[«\x22“])\p{Lu}[\p{Ll}-]{2,}(?![\p{L}])/gu;
+  const stop=new Set(['Алиса','ГигаЧат','Минфин','Минфина','Минфином','Москва','Москве','Калининград','Калининграде','Россия','России','Телефон','Почта','Адрес','Карта','Контрагент','Поставщик','Покупатель','Клиент','Договор','Счёт','Акт','Приказ','Директор','Бухгалтер','Добрый','Здравствуйте','Спасибо','Уважаемый','Уважаемая','С','По','На','В','Для','Прошу','Просим']);
+  html=html.replace(caps,m=>{if(stop.has(m)||pw.has(m))return m; warns.push('Слово с заглавной: «'+m+'»');return ''+m+''});
+  const rest=t.replace(/[-]\d*[-]?/g,' ');
+  [['@',/@/],['+7',/\+7/],['ИНН с цифрами',/ИНН\s*\d/],['СНИЛС с цифрами',/СНИЛС\s*\d/],['«ул.»',/ул\./],['длинное число',/\d{9,}/]].forEach(([n,re])=>{ if(re.test(rest)) warns.push('RES:В тексте осталось '+n+' — проверьте'); });
+  html=html.replace(/(\d+)/g,(m,i)=>'<mark>'+esc(store[+i].lab)+'</mark>')
+           .replace(//g,'<mark class="w">').replace(//g,'</mark>')
+           .replace(//g,'<mark class="r">').replace(//g,'</mark>');
+  $('out').innerHTML=html;
+  const plain=t.replace(/(\d+)/g,(m,i)=>store[+i].lab);
+  $('out').dataset.plain=plain;
+  const ch=$('checks'); ch.innerHTML='';
+  const nAuto=store.filter(s=>s.kind==='auto').length, nCode=store.filter(s=>s.kind==='code').length;
+  const li=(c,s)=>{const e=document.createElement('li');e.className=c;e.textContent=s;ch.appendChild(e)};
+  if(redHits.length) li('bd','Красная зона: «'+[...new Set(redHits.map(s=>s.toLowerCase()))].join('», «')+'». Пароли, логины и коды в ИИ не отправляем — удалите эти строки целиком.');
+  li('ok','Заменено по таблице кодов: '+nCode+'. Автоматически убрано: '+nAuto+'.');
+  const uw=[...new Set(warns)];
+  if(uw.length) uw.slice(0,12).forEach(w=>li('wr',w.startsWith('RES:')?w.slice(4)+'.':w+'. Если это человек или компания — добавьте в таблицу кодов и нажмите «Обезличить» ещё раз.'));
+  else if(!redHits.length) li('ok','Подозрительных слов не найдено. Всё равно перечитайте текст перед отправкой.');
+  $('stat').textContent='Знаков: '+plain.length+(plain.length>4000?' — больше 4 000: для ГигаЧата разбейте на две части.':'');
+  $('res').style.display='block';
+}
+function decode(){
+  let t=$('ans').value; if(!t.trim()){toast('Вставьте ответ ИИ');return}
+  rows.forEach(r=>{if(r.code.trim()&&r.names.trim()&&!lastMap[r.code.trim()])lastMap[r.code.trim()]={orig:r.names.split(';')[0].trim()}});
+  const keys=Object.keys(lastMap).sort((a,b)=>b.length-a.length); let n=0; const miss=new Set();
+  const store=[];
+  keys.forEach(k=>{const re=new RegExp('(?<![\\p{L}\\d])'+reEsc(k)+'(?![\\d])','gu');t=t.replace(re,()=>{n++;store.push(lastMap[k].orig);return ''+(store.length-1)+''})});
+  (t.match(/\{\{[^}]+\}\}|(?<![\p{L}\d])[КФСП]-\d{2,3}(?!\d)/gu)||[]).forEach(m=>miss.add(m));
+  const html=esc(t).replace(/(\d+)/g,(m,i)=>'<mark>'+esc(store[+i])+'</mark>');
+  $('dout').innerHTML=html; $('dout').dataset.plain=t.replace(/(\d+)/g,(m,i)=>store[+i]);
+  $('dstat').textContent='Возвращено названий: '+n+'. Имена вставлены как в таблице — поправьте падеж'+(miss.size?'. Не нашлось в таблице: '+[...miss].join(', ')+' — заполните вручную.':'.');
+  $('dres').style.display='block';
+}
+function copyText(s){
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(s).then(()=>toast('Скопировано'),()=>fallback(s))}else fallback(s);
+}
+function fallback(s){const ta=document.createElement('textarea');ta.value=s;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Скопировано')}catch(e){toast('Выделите текст и нажмите Ctrl+C')}ta.remove()}
+function copyOut(){copyText($('out').dataset.plain||'')}
+function copyD(){copyText($('dout').dataset.plain||'')}
+function clearAll(){$('src').value='';$('res').style.display='none'}
+function toast(s){const e=$('toast');e.textContent=s;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1600)}
+rows=[{code:'К-01',names:'ООО «Ромашка»; Ромашка'},{code:'С-01',names:'Иванова Анна Сергеевна; Иванова'}];
+render();
+</script>
+</body></html>
