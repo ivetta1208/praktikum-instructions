@@ -42,6 +42,8 @@ pre{white-space:pre-wrap;word-wrap:break-word;background:#fff;border:2px solid v
 .note{background:var(--tint);border-left:4px solid var(--blue);border-radius:8px;padding:10px 12px;font-size:14px;margin-top:12px}
 footer{text-align:center;color:var(--muted);font-size:13px;padding:10px 0 26px}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;padding:10px 18px;border-radius:10px;display:none}
+#out{min-height:285px;border:2px solid var(--blue);border-radius:0 0 12px 12px;font-family:Consolas,"Courier New",monospace;padding:12px 16px}
+#out_header{display:block;border:2px solid var(--blue);border-bottom:0;border-radius:12px 12px 0 0;padding:8px 16px;background:var(--tint);font-family:Consolas,"Courier New",monospace;font-size:14px}
 [hidden]{display:none!important}
 </style></head><body>
 <header><div class="k">ИИ-отдел бухгалтера · урок 0.2 · подарок</div>
@@ -93,7 +95,11 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:10px 0 26px}
   </details>
  </div>
  <div class="card"><h2>Готовая инструкция</h2>
-  <pre id="out"></pre>
+  <label class="f" for="out">Текст можно редактировать прямо здесь. Версия берётся из поля «Версия» слева.</label>
+  <span id="out_header"></span>
+  <textarea id="out" spellcheck="false"></textarea>
+  <p id="manual_note" hidden>Используется текст, который вы отредактировали. Чтобы снова собрать его из полей слева, нажмите «Собрать из полей».</p>
+  <button class="b sec" id="regenerate" type="button" hidden>Собрать из полей</button>
   <div class="bar"><button class="b pri" id="copy">Копировать</button><button class="b sec" id="dl">Скачать .txt</button><button class="b sec" id="reset">Сбросить</button></div>
   <div class="st" id="st"></div>
   <div class="note"><b>Как отправить.</b> Новый чат → вставьте инструкцию → пустая строка → ваши данные (или приложите один TXT-файл). Всё — одним сообщением. Без ФИО, ИНН, телефонов и названий: только коды К-01 и метки {{ФИО}}.</div>
@@ -114,8 +120,12 @@ let rules=V.rules.map(t=>({t,on:false})),checks=V.checks.map(t=>({t,on:false}));
 function drawList(id,arr){const box=$(id);box.innerHTML='';arr.forEach((x,i)=>{const l=document.createElement('label');const c=document.createElement('input');c.type='checkbox';c.checked=x.on;c.onchange=()=>{x.on=c.checked;render()};const s=document.createElement('span');s.textContent=x.t;l.append(c,s);box.appendChild(l)})}
 function val(id){const s=$(id);if(s.value==='own')return $(id+'_o').value.trim();if(s.value==='')return '';return V[id][+s.value]}
 function monthYear(){const d=new Date();return String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear()}
-function build(){
- const L=[];L.push('Версия '+($('ver').value.trim()||'1.0')+' · '+($('date').value.trim()||monthYear())+' · '+($('name').value.trim()||'Мой помощник'));
+let manualBody = null;
+function instructionHeader() {
+ return 'Версия '+($('ver').value.trim()||'1.0')+' · '+($('date').value.trim()||monthYear())+' · '+($('name').value.trim()||'Мой помощник');
+}
+function generatedBody(){
+ const L=[];
  const j=(a,b)=>[a,b].filter(Boolean).join(' ');
  L.push('РОЛЬ. '+j(val('role'),val('aud')));
  L.push('ЗАДАЧА И РЕЗУЛЬТАТ. '+j(val('task'),val('fmt')));
@@ -125,15 +135,26 @@ function build(){
  L.push('ПРОВЕРКА. '+checks.filter(x=>x.on).map(x=>x.t).join(' '));
  return L.join('\n');
 }
+function build() {
+ return instructionHeader() + '\n' + (manualBody ?? generatedBody());
+}
 function render(){
- const t=build();$('out').textContent=t;
+ const body = manualBody ?? generatedBody();
+ const t = build();
+ $('out_header').textContent = instructionHeader();
+ if ($('out').value !== body) $('out').value = body;
+ $('manual_note').hidden = $('regenerate').hidden = manualBody === null;
  const st=[];const n=t.length;
  const filled=[j2(val('role')),j2(val('task')),j2(val('data')),rules.some(x=>x.on),checks.some(x=>x.on)];
  function j2(x){return !!x}
  const names=['Роль','Задача','Исходные данные','Правила','Проверка'].filter((_,i)=>!filled[i]);
- st.push(names.length?['er','Не заполнено: '+names.join(', ')]:['ok','Все 5 пунктов заполнены']);
- const rc=rules.filter(x=>x.on).length;
- st.push(rc>=3?['ok','Правил: '+rc]:['wr','Правил: '+rc+' — добавьте хотя бы 3 конкретных запрета']);
+ if (manualBody === null) {
+  st.push(names.length?['er','Не заполнено: '+names.join(', ')]:['ok','Все 5 пунктов заполнены']);
+  const rc=rules.filter(x=>x.on).length;
+  st.push(rc>=3?['ok','Правил: '+rc]:['wr','Правил: '+rc+' — добавьте хотя бы 3 конкретных запрета']);
+ } else if (!manualBody.trim()) {
+  st.push(['er','Введите текст инструкции']);
+ }
  st.push(n>3000?['wr','Длина: '+n+' знаков — для ГигаЧата длинно: запрос вместе с данными до 4 000 знаков']:['ok','Длина: '+n+' знаков']);
  if(/\b\d{10,12}\b|\+7\s?\(?\d|@[\w-]+\.|ИНН|паспорт/i.test(t)) st.push(['er','Похоже на персональные данные (ИНН, телефон, почта, паспорт). Уберите их из инструкции']);
  $('st').innerHTML='';st.forEach(([c,m])=>{const d=document.createElement('div');d.className=c;d.textContent=' '+m;$('st').appendChild(d)});
@@ -151,7 +172,9 @@ function init(){
  $('check_add').onclick=()=>{const v=$('check_new').value.trim();if(v){checks.push({t:v,on:true});$('check_new').value='';drawList('checks',checks);render()}};
  $('copy').onclick=async()=>{const t=build();try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}const x=$('toast');x.style.display='block';setTimeout(()=>x.style.display='none',1500)};
  $('dl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([build()],{type:'text/plain;charset=utf-8'}));a.download=($('name').value.trim()||'Инструкция')+'_v'+($('ver').value.trim()||'1.0')+'.txt';a.click()};
- $('reset').onclick=()=>applyPreset(0);
+ $('out').oninput = () => { manualBody = $('out').value; render(); };
+ $('regenerate').onclick = () => { manualBody = null; render(); };
+ $('reset').onclick = () => { manualBody = null; applyPreset(0); };
  applyPreset(0);
 }
 init();

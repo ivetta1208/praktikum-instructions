@@ -12,6 +12,7 @@
 
   function isInstruction(data) {
     return data && typeof data.text === 'string' && data.text.length > 0 &&
+      (data.manualBody == null || typeof data.manualBody === 'string') &&
       versionPattern.test(data.version) && typeof data.name === 'string' &&
       typeof data.date === 'string' && Array.isArray(data.fields) &&
       data.fields.length === sel.length && data.fields.every(field => typeof field === 'string') &&
@@ -69,6 +70,7 @@
     }
     rules = restore(V.rules, published.rules);
     checks = restore(V.checks, published.checks);
+    manualBody = published.manualBody ?? null;
     drawList('rules', rules);
     drawList('checks', checks);
     render();
@@ -94,11 +96,14 @@
       fields: sel.map(val),
       rules: rules.filter(item => item.on).map(item => item.t),
       checks: checks.filter(item => item.on).map(item => item.t),
+      manualBody,
       text: build()
     };
-    if (!versionPattern.test(version) || !data.fields[0] || !data.fields[2] ||
-        !data.fields[4] || !data.rules.length || !data.checks.length) {
-      publishStatus.textContent = 'Укажите версию в формате 2.0 и заполните все пять пунктов.';
+    const hasText = manualBody === null ?
+      data.fields[0] && data.fields[2] && data.fields[4] && data.rules.length && data.checks.length :
+      manualBody.trim();
+    if (!versionPattern.test(version) || !hasText) {
+      publishStatus.textContent = 'Укажите версию в формате 2.0 и заполните текст инструкции.';
       return;
     }
     if (!window.confirm('Опубликовать версию ' + version + ' по открытой ссылке для команды?')) return;
