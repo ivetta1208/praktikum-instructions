@@ -42,6 +42,7 @@ pre{white-space:pre-wrap;word-wrap:break-word;background:#fff;border:2px solid v
 .note{background:var(--tint);border-left:4px solid var(--blue);border-radius:8px;padding:10px 12px;font-size:14px;margin-top:12px}
 footer{text-align:center;color:var(--muted);font-size:13px;padding:10px 0 26px}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;padding:10px 18px;border-radius:10px;display:none}
+[hidden]{display:none!important}
 </style></head><body>
 <header><div class="k">ИИ-отдел бухгалтера · урок 0.2 · подарок</div>
 <h1>Конструктор инструкции для ИИ: 5 пунктов</h1>
@@ -72,6 +73,25 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:10px 0 26px}
   <div class="add"><input type="text" id="check_new" placeholder="Своя проверка"><button class="b sec" id="check_add">Добавить</button></div></div>
 </section>
 <section class="out">
+ <div class="card">
+  <h2>Инструкция для команды</h2>
+  <pre id="published_text" hidden></pre>
+  <div class="bar" id="published_actions" hidden>
+   <button class="b pri" id="published_copy" type="button">Копировать опубликованную</button>
+   <button class="b sec" id="published_load" type="button">Открыть в конструкторе</button>
+  </div>
+  <p id="published_status" role="status">Загружаем опубликованную инструкцию…</p>
+  <details>
+   <summary>Публикация для владельца</summary>
+   <p>Проверьте текст в блоке «Готовая инструкция» и укажите новую версию. Публикуйте только текст, который можно открыть по публичной ссылке.</p>
+   <form id="publish_form" autocomplete="off">
+    <label class="f" for="publish_token">Ключ публикации GitHub</label>
+    <input id="publish_token" type="password" required autocomplete="off">
+    <div class="bar"><button class="b pri" id="publish_button" type="submit">Опубликовать готовую инструкцию</button></div>
+   </form>
+   <p id="publish_status" role="status"></p>
+  </details>
+ </div>
  <div class="card"><h2>Готовая инструкция</h2>
   <pre id="out"></pre>
   <div class="bar"><button class="b pri" id="copy">Копировать</button><button class="b sec" id="dl">Скачать .txt</button><button class="b sec" id="reset">Сбросить</button></div>
@@ -135,4 +155,4 @@ function init(){
  applyPreset(0);
 }
 init();
-</script></body></html>
+</script><script src="team-instruction.js"></script></body></html>
