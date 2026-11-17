@@ -45,12 +45,39 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:10px 0 26px}
 #out{min-height:285px;border:2px solid var(--blue);border-radius:0 0 12px 12px;font-family:Consolas,"Courier New",monospace;padding:12px 16px}
 #out_header{display:block;border:2px solid var(--blue);border-bottom:0;border-radius:12px 12px 0 0;padding:8px 16px;background:var(--tint);font-family:Consolas,"Courier New",monospace;font-size:14px}
 [hidden]{display:none!important}
+
+.template-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0 14px}
+.template-status{margin:8px 0 0;color:var(--muted)}
+button.b:disabled{opacity:.65;cursor:default}
+#template_preview{min-height:0;margin-top:8px}
 </style></head><body>
 <header><div class="k">ИИ-отдел бухгалтера · урок 0.2 · подарок</div>
 <h1>Конструктор инструкции для ИИ: 5 пунктов</h1>
 <p>Выберите помощника — поля заполнятся заготовкой. Поменяйте формулировки, отметьте галочками правила и проверку. Готовая инструкция собирается в блоке «Готовая инструкция»: копируете и вставляете в новый чат Алисы AI или ГигаЧата.</p></header>
 <main>
 <section>
+ <div class="card">
+  <h2>Шаблоны сообщений для стажёра</h2>
+  <form id="message_template_form" autocomplete="off">
+   <label class="f" for="message_template">Ситуация</label>
+   <select id="message_template"></select>
+   <p id="message_template_when"></p>
+   <p>Укажите код клиента и обезличенные данные. Настоящие имена и реквизиты подставляйте в письмо после проверки ответа.</p>
+   <div class="template-fields">
+    <div>
+     <label class="f" for="message_client_code">Код клиента</label>
+     <input type="text" id="message_client_code" value="К-01" pattern="[КкKk]-[0-9]+" title="Например, К-01" required>
+    </div>
+    <div id="message_template_fields" class="template-fields" style="display:contents"></div>
+   </div>
+   <pre id="template_preview" aria-label="Черновик для стажёра"></pre>
+   <div class="bar">
+    <button class="b pri" id="message_copy" type="submit" disabled>Скопировать для ГигаЧата</button>
+   </div>
+   <p class="template-status" id="message_template_status" role="status"></p>
+  </form>
+ </div>
+
  <div class="card"><h2><span class="num">0</span>Какой помощник нужен</h2>
   <div class="presets" id="presets"></div>
   <div class="row3" style="margin-top:12px">
@@ -178,4 +205,145 @@ function init(){
  applyPreset(0);
 }
 init();
-</script><script src="team-instruction.js"></script></body></html>
+</script><script src="team-instruction.js"></script>
+<script>
+(() => {
+ const templates = [
+  {
+    "title": "Запрос выписки",
+    "when": "Нужна банковская выписка за период.",
+    "draft": "прислать выписку за {{период}} до {{дата}}, по всем счетам, формат {{формат}}."
+  },
+  {
+    "title": "Запрос документов за период",
+    "when": "Для закрытия месяца или квартала не хватает первичных документов.",
+    "draft": "для закрытия {{период}} нужны {{список документов}} до {{дата}}, скан или ЭДО."
+  },
+  {
+    "title": "Повторное напоминание о документах",
+    "when": "Срок прошёл, документы не пришли.",
+    "draft": "не прислали {{что ждём}} за {{период}}, срок был {{дата}}, без этого не можем {{что не можем сделать}}. Спросить, когда пришлют."
+  },
+  {
+    "title": "Напоминание об оплате счёта",
+    "when": "Счёт за обслуживание не оплачен. Сумму в сообщении не пишем — она в счёте.",
+    "draft": "счёт № {{номер счёта}} от {{дата счёта}} не оплачен. Если оплатили — пусть пришлют платёжку. Можем выслать счёт повторно."
+  },
+  {
+    "title": "Платёжное поручение на подписи",
+    "when": "Подготовили платёж по налогу или взносам, клиенту нужно подписать его в банке.",
+    "draft": "платёжка {{какой платёж}} в банке на подписи, подписать до {{дата}}."
+  },
+  {
+    "title": "Пришло требование из налоговой",
+    "when": "Получили требование ИФНС, от клиента нужны документы или сведения.",
+    "draft": "пришло требование ИФНС: {{что запрашивают}}. От клиента нужно {{что нужно от клиента}} до {{дата}}. Ответ готовим мы."
+  },
+  {
+    "title": "Уточнение по платежу в выписке",
+    "when": "В выписке есть платёж, назначение которого непонятно.",
+    "draft": "в выписке за {{период}} платёж от {{дата платежа}}, {{контрагент или назначение}} — за что и есть ли документы."
+  },
+  {
+    "title": "Документы на нового сотрудника",
+    "when": "Клиент принимает работника, нужны документы и сведения.",
+    "draft": "приём на должность {{должность}} с {{дата приёма}}, нужны {{список документов и сведений}} до {{дата}}, передать через {{способ передачи}}."
+  },
+  {
+    "title": "Отчёт сдан",
+    "when": "Отчётность отправлена и принята — сообщаем клиенту.",
+    "draft": "{{название отчёта}} за {{период}} отправлен {{дата отправки}}, принят. От клиента ничего не нужно. Копию пришлём по запросу."
+  },
+  {
+    "title": "Вопрос о стоимости передан руководителю",
+    "when": "Клиент спросил о цене услуги. Цену называет только руководитель.",
+    "draft": "вопрос о стоимости {{услуга}} передан руководителю, ответит {{когда}}."
+  }
+];
+ const form = $('message_template_form');
+ const select = $('message_template');
+ const fields = $('message_template_fields');
+ const code = $('message_client_code');
+ const instruction = $('published_text');
+ const button = $('message_copy');
+ const status = $('message_template_status');
+ const placeholder = /\{\{([^{}]+)\}\}/g;
+ let draft;
+ let inputs;
+
+ function updatePreview() {
+  const client = code.value.trim() || 'К-01';
+  const text = draft.replace(placeholder, (marker, name) => inputs.get(name).value.trim() || marker);
+  $('template_preview').textContent = 'ЧЕРНОВИК: ' + client + ', ' + text;
+  return $('template_preview').textContent;
+ }
+
+ function selectTemplate() {
+  const template = templates[Number(select.value)];
+  draft = template.draft;
+  $('message_template_when').textContent = template.when;
+  inputs = new Map();
+  fields.replaceChildren();
+  for (const [, name] of draft.matchAll(placeholder)) {
+   if (inputs.has(name)) continue;
+   const field = document.createElement('div');
+   const label = document.createElement('label');
+   const input = document.createElement('input');
+   input.id = 'message_template_value_' + inputs.size;
+   input.type = 'text';
+   input.required = true;
+   label.htmlFor = input.id;
+   label.className = 'f';
+   label.textContent = name[0].toUpperCase() + name.slice(1);
+   field.append(label, input);
+   fields.append(field);
+   inputs.set(name, input);
+  }
+  updatePreview();
+ }
+
+ function updateAvailability() {
+  button.disabled = !instruction.textContent.trim();
+  status.textContent = button.disabled
+   ? 'Для копирования нужна опубликованная инструкция. Если она не загрузилась, обновите страницу.'
+   : 'В буфер попадут опубликованная инструкция и черновик одним сообщением.';
+ }
+
+ templates.forEach((template, index) => {
+  select.add(new Option(template.title, String(index)));
+ });
+ select.addEventListener('change', selectTemplate);
+ form.addEventListener('input', event => {
+  if (event.target === select) return;
+  if (event.target !== code) {
+   event.target.setCustomValidity(event.target.value && !event.target.value.trim() ? 'Заполните поле.' : '');
+  }
+  updatePreview();
+ });
+ form.addEventListener('submit', async event => {
+  event.preventDefault();
+  const teamText = instruction.textContent.trim();
+  if (!teamText) return;
+  const message = teamText + '\n\n' + updatePreview();
+  try {
+   await navigator.clipboard.writeText(message);
+   status.textContent = 'Скопировано. Вставьте текст одним сообщением в новый чат ГигаЧата.';
+  } catch {
+   const copyField = document.createElement('textarea');
+   copyField.value = message;
+   copyField.readOnly = true;
+   copyField.setAttribute('aria-label', 'Сообщение для ручного копирования');
+   const previous = form.querySelector('textarea[readonly]');
+   if (previous) previous.remove();
+   form.append(copyField);
+   copyField.focus();
+   copyField.select();
+   status.textContent = 'Сообщение выделено ниже. Нажмите ⌘C или Ctrl+C.';
+  }
+ });
+ new MutationObserver(updateAvailability).observe(instruction, { childList: true, subtree: true, characterData: true });
+ selectTemplate();
+ updateAvailability();
+})();
+</script>
+</body></html>
